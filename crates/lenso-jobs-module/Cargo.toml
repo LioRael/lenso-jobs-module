@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "First-party durable single-step Jobs Module for Lenso applications."
 edition.workspace = true
 license.workspace = true
-publish = false
+publish = true
 repository.workspace = true
 rust-version.workspace = true
 
@@ -17,10 +17,10 @@ base64.workspace = true
 futures.workspace = true
 getrandom.workspace = true
 lenso-capability-jobs = { path = "../lenso-capability-jobs", version = "0.1.0" }
-lenso-capability-secrets = { git = "https://github.com/LioRael/lenso-secrets-module", rev = "be02927a185ebdbb463038ba79d8c6ebbea771f1" }
+lenso-capability-secrets = { version = "0.1.0", git = "https://github.com/LioRael/lenso-secrets-module", rev = "be02927a185ebdbb463038ba79d8c6ebbea771f1" }
 lenso-kernel = "0.1.4"
 lenso-native-adapter = "0.1.1"
-lenso-postgres-kit = { git = "https://github.com/LioRael/lenso-postgres-kit", rev = "525c1012c789e6f54c3c2fdaf8507a626c93e65f" }
+lenso-postgres-kit = { version = "0.1.0", git = "https://github.com/LioRael/lenso-postgres-kit", rev = "525c1012c789e6f54c3c2fdaf8507a626c93e65f" }
 serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
