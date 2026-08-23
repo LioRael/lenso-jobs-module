@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","required":["status","available_at"],"properties":{"status":{"type":"string","enum":["queued","failed"]},"available_at":{"type":["string","null"],"format":"date-time"}},"additionalProperties":false}

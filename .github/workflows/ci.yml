@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: lenso_jobs_test
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d lenso_jobs_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      LENSO_JOBS_TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/lenso_jobs_test
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: dtolnay/rust-toolchain@fa04a1451ff1842e2626ccb99004d0195b455a88 # stable
+        with:
+          toolchain: 1.94.0
+          components: rustfmt,clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: ./scripts/check-repository-boundary.sh
+      - run: cargo fmt --all -- --check
+      - run: cargo check --locked --workspace --all-targets
+      - run: cargo test --locked --workspace --features postgres-acceptance
+      - run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings

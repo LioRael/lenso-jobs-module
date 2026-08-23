@@ -1,0 +1,14 @@
+{
+  "id": "lenso.jobs@1",
+  "version": "1.0.0",
+  "portable": true,
+  "cross_lane_transfer": true,
+  "operations": [
+    {"name":"enqueue","interaction":"request","request_schema":"schemas/enqueue-request.schema.json","response_schema":"schemas/enqueue-response.schema.json","domain_error_schema":"schemas/enqueue-error.schema.json"},
+    {"name":"claim","interaction":"request","request_schema":"schemas/claim-request.schema.json","response_schema":"schemas/claim-response.schema.json","domain_error_schema":"schemas/claim-error.schema.json"},
+    {"name":"renew","interaction":"request","request_schema":"schemas/renew-request.schema.json","response_schema":"schemas/renew-response.schema.json","domain_error_schema":"schemas/lease-error.schema.json"},
+    {"name":"complete","interaction":"request","request_schema":"schemas/complete-request.schema.json","response_schema":"schemas/complete-response.schema.json","domain_error_schema":"schemas/lease-error.schema.json"},
+    {"name":"fail","interaction":"request","request_schema":"schemas/fail-request.schema.json","response_schema":"schemas/fail-response.schema.json","domain_error_schema":"schemas/fail-error.schema.json"},
+    {"name":"inspect","interaction":"request","request_schema":"schemas/inspect-request.schema.json","response_schema":"schemas/inspect-response.schema.json","domain_error_schema":"schemas/inspect-error.schema.json"}
+  ]
+}

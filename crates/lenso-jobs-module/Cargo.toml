@@ -1,0 +1,38 @@
+[package]
+name = "lenso-jobs-module"
+version = "0.1.0"
+description = "First-party durable single-step Jobs Module for Lenso applications."
+edition.workspace = true
+license.workspace = true
+publish = false
+repository.workspace = true
+rust-version.workspace = true
+
+[features]
+default = []
+postgres-acceptance = []
+
+[dependencies]
+base64.workspace = true
+futures.workspace = true
+getrandom.workspace = true
+lenso-capability-jobs = { path = "../lenso-capability-jobs", version = "0.1.0" }
+lenso-capability-secrets = { git = "https://github.com/LioRael/lenso-secrets-module", rev = "be02927a185ebdbb463038ba79d8c6ebbea771f1" }
+lenso-kernel = "0.1.4"
+lenso-native-adapter = "0.1.1"
+lenso-postgres-kit = { git = "https://github.com/LioRael/lenso-postgres-kit", rev = "525c1012c789e6f54c3c2fdaf8507a626c93e65f" }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+thiserror.workspace = true
+time.workspace = true
+zeroize.workspace = true
+
+[dev-dependencies]
+lenso-app-plan = "0.1.0"
+tokio = { version = "1.52", features = ["macros", "rt-multi-thread", "time"] }
+url = "2.5"
+
+[lints]
+workspace = true
