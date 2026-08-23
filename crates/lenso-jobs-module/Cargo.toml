@@ -17,7 +17,7 @@ base64.workspace = true
 futures.workspace = true
 getrandom.workspace = true
 lenso-capability-jobs = { path = "../lenso-capability-jobs", version = "0.1.0" }
-lenso-capability-secrets = { version = "0.1.0", git = "https://github.com/LioRael/lenso-secrets-module", rev = "be02927a185ebdbb463038ba79d8c6ebbea771f1" }
+lenso-capability-secrets = { version = "0.1.0", git = "https://github.com/LioRael/lenso-secrets-module", rev = "0f26fc816771ed5b8a84aa0567ca50fd9c3250e0" }
 lenso-kernel = "0.1.4"
 lenso-native-adapter = "0.1.1"
 lenso-postgres-kit = { version = "0.1.0", git = "https://github.com/LioRael/lenso-postgres-kit", rev = "525c1012c789e6f54c3c2fdaf8507a626c93e65f" }

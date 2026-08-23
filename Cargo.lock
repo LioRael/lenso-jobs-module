@@ -630,7 +630,7 @@ name = "lenso-capability-jobs"
 version = "0.1.0"
 dependencies = [
  "futures",
- "lenso-contract-codegen 0.5.1",
+ "lenso-contract-codegen",
  "lenso-contract-runtime",
  "lenso-kernel",
  "serde",
@@ -640,22 +640,13 @@ dependencies = [
 [[package]]
 name = "lenso-capability-secrets"
 version = "0.1.0"
-source = "git+https://github.com/LioRael/lenso-secrets-module?rev=be02927a185ebdbb463038ba79d8c6ebbea771f1#be02927a185ebdbb463038ba79d8c6ebbea771f1"
+source = "git+https://github.com/LioRael/lenso-secrets-module?rev=0f26fc816771ed5b8a84aa0567ca50fd9c3250e0#0f26fc816771ed5b8a84aa0567ca50fd9c3250e0"
 dependencies = [
  "futures",
- "lenso-contract-codegen 0.1.0",
+ "lenso-contract-codegen",
+ "lenso-contract-runtime",
  "lenso-kernel",
  "serde",
- "serde_json",
-]
-
-[[package]]
-name = "lenso-contract-codegen"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71aa6b7c5c4dc62b2883b10296e1b47bcff437d3cc655a4c8d7d4f21ff9acf8e"
-dependencies = [
- "semver",
  "serde_json",
 ]
 

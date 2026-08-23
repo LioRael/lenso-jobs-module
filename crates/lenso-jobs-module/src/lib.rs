@@ -680,8 +680,8 @@ mod tests {
     };
     use lenso_capability_secrets::{
         CAPABILITY_ID as SECRETS_CAPABILITY_ID, DESCRIPTOR_VERSION as SECRETS_DESCRIPTOR_VERSION,
-        RESOLVE_OPERATION, ResolveRequest, ResolveResponse, SecretsEndpoint,
-        SecretsInvocationError, SecretsProvider,
+        RESOLVE_OPERATION, ResolveError, ResolveRequest, ResolveResponse, SecretsEndpoint,
+        SecretsProvider,
     };
     use lenso_kernel::{DeterministicDriver, Kernel, NativeRequestEndpoint};
     use lenso_native_adapter::{NativeModuleInstance, NativeModuleRegistry};
@@ -716,10 +716,11 @@ mod tests {
             &self,
             _context: InvocationContext,
             _request: ResolveRequest,
-        ) -> LocalBoxFuture<'static, Result<ResolveResponse, SecretsInvocationError>> {
-            Box::pin(futures::future::ready(Ok(ResolveResponse {
+        ) -> LocalBoxFuture<'static, Result<Result<ResolveResponse, ResolveError>, RuntimeFailure>>
+        {
+            Box::pin(futures::future::ready(Ok(Ok(ResolveResponse {
                 value: "postgres://unused".to_owned(),
-            })))
+            }))))
         }
     }
 
