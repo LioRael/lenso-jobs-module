@@ -29,6 +29,11 @@ The portable `lenso.jobs@1` Capability provides:
 
 Workflow graphs, recurring schedules, priorities, cancellation, progress streams, and a Web/Console surface are intentionally deferred until a real consumer requires them.
 
+The Descriptor and Schemas in this repository are the authoritative Capability
+Interface. Rust bindings are published by `lenso-capability-jobs`; the supported
+Bun projection is delivered through `@lenso/bun/capabilities/jobs` instead of
+being embedded in this Rust crate.
+
 ## Ownership
 
 The Jobs Module owns job identity, queue placement, availability time, attempt count, lease generation, lease expiry, retry schedule, terminal status, and the last stable failure code. A consuming business Module owns the schema and meaning of `payload`, selects the job kind, and makes every external effect idempotent because execution is at-least-once.
