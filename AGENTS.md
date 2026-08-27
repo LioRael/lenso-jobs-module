@@ -1,6 +1,6 @@
 # Agent instructions
 
-This repository contains the first-party durable Jobs Module for Lenso.
+This repository contains the first-party durable Jobs Plugin for Lenso.
 
 - Jobs owns durable scheduling, leases, retry policy, terminal state, and operational evidence.
 - Business Modules own job payload meaning, handler behavior, and idempotency of external effects.

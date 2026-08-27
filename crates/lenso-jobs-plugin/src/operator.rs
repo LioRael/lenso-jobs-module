@@ -5,7 +5,7 @@ use thiserror::Error;
 
 use crate::schema::schema_plan;
 
-/// Explicit schema administration for one Jobs Module Instance.
+/// Explicit schema administration for one Jobs Plugin Instance.
 #[derive(Clone, Debug)]
 pub struct JobsOperator {
     postgres: OwnedPostgres,

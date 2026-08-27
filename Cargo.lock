@@ -232,6 +232,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
 
 [[package]]
+name = "dyn-clone"
+version = "1.0.20"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555"
+
+[[package]]
 name = "either"
 version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -610,6 +616,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "inventory"
+version = "0.3.24"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a4f0c30c76f2f4ccee3fe55a2435f691ca00c0e4bd87abe4f4a851b1d4dac39b"
+dependencies = [
+ "rustversion",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -617,9 +632,8 @@ checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 
 [[package]]
 name = "lenso-app-plan"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b66690f1ecca50f36ddc7ee5946d6d796fb2b7b9135c7f0c9c16e8c9d48788e"
+version = "0.3.0"
+source = "git+https://github.com/LioRael/lenso?rev=cd35675a191d815b690c8889756dfe859a0e4d7b#cd35675a191d815b690c8889756dfe859a0e4d7b"
 dependencies = [
  "serde",
  "serde_json",
@@ -633,38 +647,59 @@ dependencies = [
  "lenso-contract-codegen",
  "lenso-contract-runtime",
  "lenso-kernel",
+ "lenso-plugin-authoring",
  "serde",
  "serde_json",
 ]
 
 [[package]]
 name = "lenso-capability-secrets"
-version = "0.1.0"
-source = "git+https://github.com/LioRael/lenso-secrets-module?rev=0f26fc816771ed5b8a84aa0567ca50fd9c3250e0#0f26fc816771ed5b8a84aa0567ca50fd9c3250e0"
+version = "0.1.1"
+source = "git+https://github.com/LioRael/lenso-secrets-module?rev=c31aa142ff59b4536e2bf3e9785ccbb5bb5c0e6a#c31aa142ff59b4536e2bf3e9785ccbb5bb5c0e6a"
 dependencies = [
  "futures",
  "lenso-contract-codegen",
  "lenso-contract-runtime",
  "lenso-kernel",
+ "lenso-plugin-authoring",
  "serde",
  "serde_json",
 ]
 
 [[package]]
-name = "lenso-contract-codegen"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e53f306e655ab863e3940b847a2e4c242a53a326b68697f2892678367ffb480"
+name = "lenso-contract-authoring"
+version = "0.1.1"
+source = "git+https://github.com/LioRael/lenso-protocols?rev=9769bc5dc828fd9111da6d28a4ecd5f1bb198ab4#9769bc5dc828fd9111da6d28a4ecd5f1bb198ab4"
 dependencies = [
+ "lenso-contract-authoring-macros",
+ "schemars",
+ "serde_json",
+]
+
+[[package]]
+name = "lenso-contract-authoring-macros"
+version = "0.1.0"
+source = "git+https://github.com/LioRael/lenso-protocols?rev=9769bc5dc828fd9111da6d28a4ecd5f1bb198ab4#9769bc5dc828fd9111da6d28a4ecd5f1bb198ab4"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "lenso-contract-codegen"
+version = "0.6.3"
+source = "git+https://github.com/LioRael/lenso-protocols?rev=9769bc5dc828fd9111da6d28a4ecd5f1bb198ab4#9769bc5dc828fd9111da6d28a4ecd5f1bb198ab4"
+dependencies = [
+ "lenso-contract-authoring",
  "semver",
  "serde_json",
 ]
 
 [[package]]
 name = "lenso-contract-runtime"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb27de491e87d8bce223fade970fedc8348326e395640ee3d260b7a569b9e02d"
+version = "0.1.3"
+source = "git+https://github.com/LioRael/lenso-protocols?rev=9769bc5dc828fd9111da6d28a4ecd5f1bb198ab4#9769bc5dc828fd9111da6d28a4ecd5f1bb198ab4"
 dependencies = [
  "base64",
  "bytes",
@@ -673,7 +708,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lenso-jobs-module"
+name = "lenso-jobs-plugin"
 version = "0.1.0"
 dependencies = [
  "base64",
@@ -698,9 +733,8 @@ dependencies = [
 
 [[package]]
 name = "lenso-kernel"
-version = "0.1.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c43d8d967cc090400ea75a78d32552cd0343e5e66b83b8500c489825ec2ff16"
+version = "0.2.0"
+source = "git+https://github.com/LioRael/lenso?rev=cd35675a191d815b690c8889756dfe859a0e4d7b#cd35675a191d815b690c8889756dfe859a0e4d7b"
 dependencies = [
  "futures",
  "lenso-app-plan",
@@ -708,13 +742,34 @@ dependencies = [
 
 [[package]]
 name = "lenso-native-adapter"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f11dccbe0deb2acaf97f65a5b3d4399283007200ade2ac96a7045ff511eb47d"
+version = "0.3.0"
+source = "git+https://github.com/LioRael/lenso-runtime-rust?rev=b763a63adc20f1ccc9955e784c0d04c21489126b#b763a63adc20f1ccc9955e784c0d04c21489126b"
 dependencies = [
+ "futures",
+ "inventory",
  "lenso-app-plan",
  "lenso-kernel",
+ "lenso-native-adapter-macros",
+ "serde_json",
 ]
+
+[[package]]
+name = "lenso-native-adapter-macros"
+version = "0.2.0"
+source = "git+https://github.com/LioRael/lenso-runtime-rust?rev=b763a63adc20f1ccc9955e784c0d04c21489126b#b763a63adc20f1ccc9955e784c0d04c21489126b"
+dependencies = [
+ "proc-macro-crate",
+ "proc-macro2",
+ "quote",
+ "serde_json",
+ "syn 2.0.119",
+ "toml",
+]
+
+[[package]]
+name = "lenso-plugin-authoring"
+version = "0.1.1"
+source = "git+https://github.com/LioRael/lenso-protocols?rev=9769bc5dc828fd9111da6d28a4ecd5f1bb198ab4#9769bc5dc828fd9111da6d28a4ecd5f1bb198ab4"
 
 [[package]]
 name = "lenso-postgres-kit"
@@ -875,6 +930,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "439ee305def115ba05938db6eb1644ff94165c5ab5e9420d1c1bcedbba909391"
 
 [[package]]
+name = "proc-macro-crate"
+version = "3.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e67ba7e9b2b56446f1d419b1d807906278ffa1a658a8a5d8a39dcb1f5a78614f"
+dependencies = [
+ "toml_edit",
+]
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.107"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -922,6 +986,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed2bf2547551a7053d6fdfafda3f938979645c44812fbfcda098faae3f1a362d"
 dependencies = [
  "bitflags",
+]
+
+[[package]]
+name = "ref-cast"
+version = "1.0.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e440fb4e4b4147295338efb76001ab9e4efc0e5839df2c47fc5ac2381d365c3"
+dependencies = [
+ "ref-cast-impl",
+]
+
+[[package]]
+name = "ref-cast-impl"
+version = "1.0.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "92ecd8964f8453721699a1ed72037b0db49ce2f5a5138486ee89bed6f67cdf3a"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.3",
 ]
 
 [[package]]
@@ -973,6 +1057,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustversion"
+version = "1.0.23"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
+
+[[package]]
+name = "schemars"
+version = "1.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "687274d293b6cdc6e73e0fee520bf2049650090d7164f87672d212a3c530cf4a"
+dependencies = [
+ "dyn-clone",
+ "ref-cast",
+ "schemars_derive",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "schemars_derive"
+version = "1.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d98c67716b46af2f0b8cf752abc930f6f9aecfbf671ecfb531db8a31dbe4e2ba"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde_derive_internals",
+ "syn 3.0.3",
+]
+
+[[package]]
 name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1015,16 +1130,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_derive_internals"
+version = "0.30.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f852137cce035d6a4df67ccce505ff6b3e9fd3a10e3e52b24dc71e650bb1a9bd"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.3",
+]
+
+[[package]]
 name = "serde_json"
 version = "1.0.151"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14"
 dependencies = [
+ "indexmap",
  "itoa",
  "memchr",
  "serde",
  "serde_core",
  "zmij",
+]
+
+[[package]]
+name = "serde_spanned"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6662b5879511e06e8999a8a235d848113e942c9124f211511b16466ee2995f26"
+dependencies = [
+ "serde_core",
 ]
 
 [[package]]
@@ -1445,6 +1581,66 @@ dependencies = [
 ]
 
 [[package]]
+name = "toml"
+version = "0.9.12+spec-1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf92845e79fc2e2def6a5d828f0801e29a2f8acc037becc5ab08595c7d5e9863"
+dependencies = [
+ "indexmap",
+ "serde_core",
+ "serde_spanned",
+ "toml_datetime 0.7.5+spec-1.1.0",
+ "toml_parser",
+ "toml_writer",
+ "winnow 0.7.15",
+]
+
+[[package]]
+name = "toml_datetime"
+version = "0.7.5+spec-1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "92e1cfed4a3038bc5a127e35a2d360f145e1f4b971b551a2ba5fd7aedf7e1347"
+dependencies = [
+ "serde_core",
+]
+
+[[package]]
+name = "toml_datetime"
+version = "1.1.1+spec-1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3165f65f62e28e0115a00b2ebdd37eb6f3b641855f9d636d3cd4103767159ad7"
+dependencies = [
+ "serde_core",
+]
+
+[[package]]
+name = "toml_edit"
+version = "0.25.13+spec-1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6975367e4d2ef766d86af01ffad14b622fecc8d4357a998fbc4deb6e9bacaf9b"
+dependencies = [
+ "indexmap",
+ "toml_datetime 1.1.1+spec-1.1.0",
+ "toml_parser",
+ "winnow 1.0.4",
+]
+
+[[package]]
+name = "toml_parser"
+version = "1.1.3+spec-1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d38ac1cf9b95face32296c0a3ede1fdc270627c9d9c02a7274dd6d960dc4d56"
+dependencies = [
+ "winnow 1.0.4",
+]
+
+[[package]]
+name = "toml_writer"
+version = "1.1.2+spec-1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7d56353a2a665ad0f41a421187180aab746c8c325620617ad883a99a1cbe66d2"
+
+[[package]]
 name = "tracing"
 version = "0.1.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1653,6 +1849,21 @@ name = "windows_x86_64_msvc"
 version = "0.52.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
+
+[[package]]
+name = "winnow"
+version = "0.7.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df79d97927682d2fd8adb29682d1140b343be4ac0f08fd68b7765d9c059d3945"
+
+[[package]]
+name = "winnow"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23b97319f7b8343df12cc98938e5c3eb436064524c8d2b4e30a1d3a36eecdf81"
+dependencies = [
+ "memchr",
+]
 
 [[package]]
 name = "writeable"
