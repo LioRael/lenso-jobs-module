@@ -655,7 +655,7 @@ dependencies = [
 [[package]]
 name = "lenso-capability-secrets"
 version = "0.1.1"
-source = "git+https://github.com/LioRael/lenso-secrets-module?rev=c31aa142ff59b4536e2bf3e9785ccbb5bb5c0e6a#c31aa142ff59b4536e2bf3e9785ccbb5bb5c0e6a"
+source = "git+https://github.com/LioRael/lenso-secrets-plugin?rev=c31aa142ff59b4536e2bf3e9785ccbb5bb5c0e6a#c31aa142ff59b4536e2bf3e9785ccbb5bb5c0e6a"
 dependencies = [
  "futures",
  "lenso-contract-codegen 0.6.3",
