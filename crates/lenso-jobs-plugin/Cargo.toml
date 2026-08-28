@@ -1,7 +1,7 @@
 [package]
-name = "lenso-jobs-module"
+name = "lenso-jobs-plugin"
 version = "0.1.0"
-description = "First-party durable single-step Jobs Module for Lenso applications."
+description = "First-party durable single-step Jobs Plugin for Lenso applications."
 edition.workspace = true
 license.workspace = true
 publish = true
@@ -17,9 +17,9 @@ base64.workspace = true
 futures.workspace = true
 getrandom.workspace = true
 lenso-capability-jobs = { path = "../lenso-capability-jobs", version = "0.1.0" }
-lenso-capability-secrets = { version = "0.1.0", git = "https://github.com/LioRael/lenso-secrets-module", rev = "0f26fc816771ed5b8a84aa0567ca50fd9c3250e0" }
-lenso-kernel = "0.1.4"
-lenso-native-adapter = "0.1.1"
+lenso-capability-secrets = { version = "0.1.1", git = "https://github.com/LioRael/lenso-secrets-module", rev = "c31aa142ff59b4536e2bf3e9785ccbb5bb5c0e6a" }
+lenso-kernel = { version = "0.2.0", git = "https://github.com/LioRael/lenso", rev = "cd35675a191d815b690c8889756dfe859a0e4d7b" }
+lenso-native-adapter = { version = "0.3.0", git = "https://github.com/LioRael/lenso-runtime-rust", rev = "b763a63adc20f1ccc9955e784c0d04c21489126b" }
 lenso-postgres-kit = { version = "0.1.0", git = "https://github.com/LioRael/lenso-postgres-kit", rev = "525c1012c789e6f54c3c2fdaf8507a626c93e65f" }
 serde.workspace = true
 serde_json.workspace = true
@@ -30,7 +30,7 @@ time.workspace = true
 zeroize.workspace = true
 
 [dev-dependencies]
-lenso-app-plan = "0.1.0"
+lenso-app-plan = { version = "0.3.0", git = "https://github.com/LioRael/lenso", rev = "cd35675a191d815b690c8889756dfe859a0e4d7b" }
 tokio = { version = "1.52", features = ["macros", "rt-multi-thread", "time"] }
 url = "2.5"
 

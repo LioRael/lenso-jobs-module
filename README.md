@@ -1,6 +1,6 @@
-# Lenso Jobs Module
+# Lenso Jobs Plugin
 
-`lenso-jobs-module` is the first-party durable single-step Jobs Module for Lenso applications.
+`lenso-jobs-plugin` is the first-party durable single-step Jobs Plugin for Lenso applications.
 
 It owns:
 
@@ -36,7 +36,7 @@ being embedded in this Rust crate.
 
 ## Ownership
 
-The Jobs Module owns job identity, queue placement, availability time, attempt count, lease generation, lease expiry, retry schedule, terminal status, and the last stable failure code. A consuming business Module owns the schema and meaning of `payload`, selects the job kind, and makes every external effect idempotent because execution is at-least-once.
+The Jobs Plugin owns job identity, queue placement, availability time, attempt count, lease generation, lease expiry, retry schedule, terminal status, and the last stable failure code. A consuming business Module owns the schema and meaning of `payload`, selects the job kind, and makes every external effect idempotent because execution is at-least-once.
 
 Each keyed Jobs Instance declares its allowed queues and caller Instances. Use separate Jobs Instances when queues cross trust or operational boundaries.
 
@@ -58,7 +58,7 @@ One Instance uses immutable configuration validated again by the factory before 
 }
 ```
 
-The schema is [`crates/lenso-jobs-module/config.schema.json`](crates/lenso-jobs-module/config.schema.json). The database URL itself remains behind the explicitly bound Secrets Capability.
+The schema is [`crates/lenso-jobs-plugin/config.schema.json`](crates/lenso-jobs-plugin/config.schema.json). The database URL itself remains behind the explicitly bound Secrets Capability.
 
 ## Development
 

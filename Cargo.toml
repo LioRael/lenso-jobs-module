@@ -2,13 +2,13 @@
 resolver = "2"
 members = [
     "crates/lenso-capability-jobs",
-    "crates/lenso-jobs-module",
+    "crates/lenso-jobs-plugin",
 ]
 
 [workspace.package]
 edition = "2024"
 license = "MIT"
-repository = "https://github.com/LioRael/lenso-jobs-module"
+repository = "https://github.com/LioRael/lenso-jobs-plugin"
 rust-version = "1.94"
 
 [workspace.dependencies]

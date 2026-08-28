@@ -1,4 +1,4 @@
-//! Durable single-step Jobs Module for Lenso applications.
+//! Durable single-step Jobs Plugin for Lenso applications.
 
 mod operator;
 #[cfg(all(test, feature = "postgres-acceptance"))]
@@ -17,10 +17,10 @@ use lenso_capability_jobs::{
 };
 use lenso_capability_secrets::{ResolveRequest, SecretsClient, SecretsInvocationError};
 use lenso_kernel::{
-    DeactivateContext, InvocationContext, ModuleFuture, ModuleLifecycle, NativeRequestEndpoint,
-    NativeRequestFuture, PrepareContext, RequestCapability, RuntimeFailure,
+    DeactivateContext, InvocationContext, NativeRequestEndpoint, NativeRequestFuture, PluginFuture,
+    PluginLifecycle, PrepareContext, RequestCapability, RuntimeFailure,
 };
-use lenso_native_adapter::{NativeModuleFactory, NativeModuleFactoryContext, NativeModuleInstance};
+use lenso_native_adapter::{NativePluginFactory, NativePluginFactoryContext, NativePluginInstance};
 use lenso_postgres_kit::OwnedPostgres;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -30,7 +30,7 @@ use zeroize::Zeroizing;
 
 pub use operator::{JobsOperator, JobsOperatorError};
 
-/// Package identity for the linked Rust Jobs Module.
+/// Package identity for the linked Rust Jobs Plugin.
 pub const PACKAGE_ID: &str = "lenso.jobs";
 /// Exact Cargo package version linked into the host.
 pub const PACKAGE_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -38,7 +38,7 @@ pub const PACKAGE_VERSION: &str = env!("CARGO_PKG_VERSION");
 const DEPENDENCY_TIMEOUT: StdDuration = StdDuration::from_secs(10);
 const MAX_PAYLOAD_BYTES: usize = 256 * 1024;
 
-/// Immutable policy and resource references for one Jobs Module Instance.
+/// Immutable policy and resource references for one Jobs Plugin Instance.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct JobsConfig {
@@ -55,7 +55,7 @@ pub struct JobsConfig {
 }
 
 impl JobsConfig {
-    /// Creates validated policy for one Jobs Module Instance.
+    /// Creates validated policy for one Jobs Plugin Instance.
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         schema: impl Into<String>,
@@ -141,7 +141,7 @@ pub enum JobsConfigError {
 #[derive(Clone, Copy, Debug, Default)]
 pub struct JobsFactory;
 
-impl NativeModuleFactory for JobsFactory {
+impl NativePluginFactory for JobsFactory {
     fn package_id(&self) -> &'static str {
         PACKAGE_ID
     }
@@ -152,8 +152,8 @@ impl NativeModuleFactory for JobsFactory {
 
     fn instantiate(
         &self,
-        context: NativeModuleFactoryContext<'_>,
-    ) -> Result<NativeModuleInstance, RuntimeFailure> {
+        context: NativePluginFactoryContext<'_>,
+    ) -> Result<NativePluginInstance, RuntimeFailure> {
         if context.entrypoint() != "default" {
             return Err(RuntimeFailure::InvalidResolvedPlan {
                 detail: format!("unsupported Jobs entrypoint `{}`", context.entrypoint()),
@@ -176,7 +176,7 @@ impl NativeModuleFactory for JobsFactory {
             state: state.clone(),
         };
         let endpoint = Rc::new(JobsEndpoint::new(provider)) as Rc<dyn NativeRequestEndpoint>;
-        Ok(NativeModuleInstance::with_lifecycle(
+        Ok(NativePluginInstance::with_lifecycle(
             vec![endpoint],
             JobsLifecycle { config, state },
         ))
@@ -204,8 +204,8 @@ impl PostgresJobsProvider {
         self.state
             .borrow()
             .clone()
-            .ok_or_else(|| RuntimeFailure::ModuleFailure {
-                detail: "Jobs Module is not prepared".to_owned(),
+            .ok_or_else(|| RuntimeFailure::PluginFailure {
+                detail: "Jobs Plugin is not prepared".to_owned(),
             })
     }
 
@@ -475,8 +475,8 @@ struct JobsLifecycle {
     state: Rc<RefCell<Option<OwnedPostgres>>>,
 }
 
-impl ModuleLifecycle for JobsLifecycle {
-    fn prepare(&self, context: PrepareContext) -> ModuleFuture {
+impl PluginLifecycle for JobsLifecycle {
+    fn prepare(&self, context: PrepareContext) -> PluginFuture {
         let config = self.config.clone();
         let state = self.state.clone();
         let dependencies = context.dependencies().clone();
@@ -494,7 +494,7 @@ impl ModuleLifecycle for JobsLifecycle {
                 )
                 .await
                 .map_err(|error| match error {
-                    SecretsInvocationError::Domain(_) => RuntimeFailure::ModuleFailure {
+                    SecretsInvocationError::Domain(_) => RuntimeFailure::PluginFailure {
                         detail: format!(
                             "Jobs database secret `{}` was rejected",
                             config.database_url_secret
@@ -512,7 +512,7 @@ impl ModuleLifecycle for JobsLifecycle {
                 })?,
             )
             .await
-            .map_err(|error| RuntimeFailure::ModuleFailure {
+            .map_err(|error| RuntimeFailure::PluginFailure {
                 detail: error.to_string(),
             })?;
             state.replace(Some(postgres));
@@ -520,7 +520,7 @@ impl ModuleLifecycle for JobsLifecycle {
         })
     }
 
-    fn deactivate(&self, _context: DeactivateContext) -> ModuleFuture {
+    fn deactivate(&self, _context: DeactivateContext) -> PluginFuture {
         let postgres = self.state.borrow_mut().take();
         Box::pin(async move {
             if let Some(postgres) = postgres {
@@ -660,7 +660,7 @@ pub(crate) fn format_time(value: OffsetDateTime) -> Result<String, JobsError> {
 }
 
 fn runtime(error: impl fmt::Display) -> RuntimeFailure {
-    RuntimeFailure::ModuleFailure {
+    RuntimeFailure::PluginFailure {
         detail: error.to_string(),
     }
 }
@@ -672,7 +672,7 @@ mod tests {
     use futures::future::LocalBoxFuture;
     use lenso_app_plan::{
         AppComposition, CapabilityBinding, CapabilityEndpointPlan, CapabilityRequirementPlan,
-        ModuleInstancePlan, ResolvedAppPlan,
+        PluginInstancePlan, ResolvedAppPlan,
     };
     use lenso_capability_jobs::{
         CAPABILITY_ID, CLAIM_OPERATION, COMPLETE_OPERATION, ENQUEUE_OPERATION, FAIL_OPERATION,
@@ -684,7 +684,7 @@ mod tests {
         SecretsProvider,
     };
     use lenso_kernel::{DeterministicDriver, Kernel, NativeRequestEndpoint};
-    use lenso_native_adapter::{NativeModuleInstance, NativeModuleRegistry};
+    use lenso_native_adapter::{NativePluginInstance, NativePluginRegistry};
 
     use super::*;
 
@@ -695,16 +695,16 @@ mod tests {
     #[derive(Debug)]
     struct EmptyFactory(&'static str);
 
-    impl NativeModuleFactory for EmptyFactory {
+    impl NativePluginFactory for EmptyFactory {
         fn package_id(&self) -> &'static str {
             self.0
         }
 
         fn instantiate(
             &self,
-            _context: NativeModuleFactoryContext<'_>,
-        ) -> Result<NativeModuleInstance, RuntimeFailure> {
-            Ok(NativeModuleInstance::default())
+            _context: NativePluginFactoryContext<'_>,
+        ) -> Result<NativePluginInstance, RuntimeFailure> {
+            Ok(NativePluginInstance::default())
         }
     }
 
@@ -727,18 +727,18 @@ mod tests {
     #[derive(Debug)]
     struct FakeSecretsFactory;
 
-    impl NativeModuleFactory for FakeSecretsFactory {
+    impl NativePluginFactory for FakeSecretsFactory {
         fn package_id(&self) -> &'static str {
             SECRETS_PACKAGE
         }
 
         fn instantiate(
             &self,
-            _context: NativeModuleFactoryContext<'_>,
-        ) -> Result<NativeModuleInstance, RuntimeFailure> {
+            _context: NativePluginFactoryContext<'_>,
+        ) -> Result<NativePluginInstance, RuntimeFailure> {
             let endpoint =
                 Rc::new(SecretsEndpoint::new(FakeSecrets)) as Rc<dyn NativeRequestEndpoint>;
-            Ok(NativeModuleInstance::new(vec![endpoint]))
+            Ok(NativePluginInstance::new(vec![endpoint]))
         }
     }
 
@@ -757,11 +757,11 @@ mod tests {
     }
 
     fn plan(configuration: String) -> ResolvedAppPlan {
-        let producer = ModuleInstancePlan::new("producer", PRODUCER_PACKAGE)
+        let producer = PluginInstancePlan::new("producer", PRODUCER_PACKAGE)
             .with_requirement(CapabilityRequirementPlan::one(CAPABILITY_ID, "1.0.0"));
-        let worker = ModuleInstancePlan::new("worker", WORKER_PACKAGE)
+        let worker = PluginInstancePlan::new("worker", WORKER_PACKAGE)
             .with_requirement(CapabilityRequirementPlan::one(CAPABILITY_ID, "1.0.0"));
-        let jobs = ModuleInstancePlan::new("jobs", PACKAGE_ID)
+        let jobs = PluginInstancePlan::new("jobs", PACKAGE_ID)
             .with_configuration(configuration)
             .with_capability(CapabilityEndpointPlan::new(
                 CAPABILITY_ID,
@@ -779,7 +779,7 @@ mod tests {
                 SECRETS_CAPABILITY_ID,
                 SECRETS_DESCRIPTOR_VERSION,
             ));
-        let secrets = ModuleInstancePlan::new("secrets", SECRETS_PACKAGE).with_capability(
+        let secrets = PluginInstancePlan::new("secrets", SECRETS_PACKAGE).with_capability(
             CapabilityEndpointPlan::new(
                 SECRETS_CAPABILITY_ID,
                 SECRETS_DESCRIPTOR_VERSION,
@@ -881,12 +881,12 @@ mod tests {
         );
         assert!(matches!(
             storage_failure,
-            Err(RuntimeFailure::ModuleFailure { detail }) if detail.contains("not prepared")
+            Err(RuntimeFailure::PluginFailure { detail }) if detail.contains("not prepared")
         ));
     }
 
     #[test]
-    fn invalid_configuration_fails_before_module_preparation() {
+    fn invalid_configuration_fails_before_plugin_preparation() {
         let configuration = serde_json::json!({
             "schema": "public",
             "database_url_secret": "jobs/database",
@@ -902,7 +902,7 @@ mod tests {
         let result = driver.run(Kernel::start_native(
             plan(configuration),
             driver.clone(),
-            NativeModuleRegistry::new()
+            NativePluginRegistry::new()
                 .with_factory(EmptyFactory(PRODUCER_PACKAGE))
                 .with_factory(EmptyFactory(WORKER_PACKAGE))
                 .with_factory(FakeSecretsFactory)
@@ -919,14 +919,14 @@ mod tests {
     fn removing_jobs_leaves_no_kernel_or_composition_requirement() {
         let remaining = AppComposition::new(
             vec![
-                ModuleInstancePlan::new("producer", PRODUCER_PACKAGE),
-                ModuleInstancePlan::new("worker", WORKER_PACKAGE),
+                PluginInstancePlan::new("producer", PRODUCER_PACKAGE),
+                PluginInstancePlan::new("worker", WORKER_PACKAGE),
             ],
             vec![],
         )
         .resolve()
         .expect("App without Jobs behavior should still resolve");
-        assert_eq!(remaining.module_instances().len(), 2);
+        assert_eq!(remaining.plugin_instances().len(), 2);
         assert!(remaining.capability_bindings().is_empty());
     }
 }
