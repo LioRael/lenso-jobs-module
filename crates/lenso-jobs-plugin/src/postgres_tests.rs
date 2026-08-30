@@ -10,7 +10,10 @@ use sqlx::{AssertSqlSafe, Connection};
 use time::OffsetDateTime;
 use url::Url;
 
-use super::{JobsConfig, JobsOperator, PostgresJobsProvider, format_time, lease_hash, schema};
+use super::{
+    JobsConfig, JobsOperator, PostgresJobsProvider, format_time, lease_hash, schema,
+    storage::EXPIRED_RETIREMENT_BATCH_LIMIT,
+};
 
 fn context(caller: &str, request_id: u64) -> InvocationContext {
     InvocationContext::new(request_id, None, CancellationToken::new()).with_caller_instance(caller)
@@ -22,7 +25,9 @@ fn request(key: &str, kind: &str, max_attempts: i64) -> EnqueueRequest {
         kind: kind.to_owned(),
         payload: BTreeMap::from([("message_id".to_owned(), serde_json::json!("msg-42"))]),
         idempotency_key: key.to_owned(),
-        available_at: format_time(OffsetDateTime::now_utc()).unwrap(),
+        // Keep "immediately due" fixtures robust when the host and a disposable
+        // PostgreSQL VM have a bounded wall-clock skew.
+        available_at: format_time(OffsetDateTime::now_utc() - Duration::from_secs(3_600)).unwrap(),
         max_attempts,
     }
 }
@@ -66,7 +71,11 @@ async fn durable_jobs_preserve_idempotency_fencing_retry_and_terminal_state() {
         4,
         vec!["email".to_owned()],
         vec!["producer".to_owned()],
-        vec!["worker".to_owned()],
+        vec![
+            "worker".to_owned(),
+            "worker-a".to_owned(),
+            "worker-b".to_owned(),
+        ],
     )
     .unwrap()
     .with_observer_instances(vec!["observer".to_owned()])
@@ -270,9 +279,119 @@ async fn durable_jobs_preserve_idempotency_fencing_retry_and_terminal_state() {
         Some(Some("invalid_recipient".to_owned()))
     );
 
+    bounded_expired_maintenance_preserves_retryable_work(&provider, &postgres).await;
+
     postgres.pool().close().await;
     sqlx::query(AssertSqlSafe(drop_schema.as_str()))
         .execute(&mut cleanup)
         .await
         .unwrap();
+}
+
+async fn bounded_expired_maintenance_preserves_retryable_work(
+    provider: &PostgresJobsProvider,
+    postgres: &OwnedPostgres,
+) {
+    let exhausted_total = EXPIRED_RETIREMENT_BATCH_LIMIT + 17;
+    sqlx::query(
+        "INSERT INTO jobs (\
+             id, producer_instance, queue, kind, payload, idempotency_key, status, \
+             max_attempts, attempts, available_at, lease_generation, lease_owner, \
+             lease_token_hash, lease_expires_at\
+         ) \
+         SELECT 'audit-exhausted-' || series, 'producer', 'email', 'email.send', \
+                '{}'::jsonb, 'audit-exhausted-' || series, 'running', 1, 1, \
+                transaction_timestamp() - interval '3 hours', 1, 'expired-worker', \
+                decode(repeat('00', 32), 'hex'), \
+                transaction_timestamp() - interval '2 hours' \
+         FROM generate_series(1, $1) AS series",
+    )
+    .bind(exhausted_total)
+    .execute(postgres.pool())
+    .await
+    .unwrap();
+    sqlx::query(
+        "INSERT INTO jobs (\
+             id, producer_instance, queue, kind, payload, idempotency_key, status, \
+             max_attempts, attempts, available_at, lease_generation, lease_owner, \
+             lease_token_hash, lease_expires_at\
+         ) VALUES (\
+             'audit-retryable', 'producer', 'email', 'email.send', '{}'::jsonb, \
+             'audit-retryable', 'running', 2, 1, transaction_timestamp() - interval '4 hours', \
+             1, 'expired-worker', decode(repeat('11', 32), 'hex'), \
+             transaction_timestamp() - interval '2 hours'\
+         ), (\
+             'audit-queued-a', 'producer', 'email', 'email.send', '{}'::jsonb, \
+             'audit-queued-a', 'queued', 2, 0, transaction_timestamp() - interval '1 hour', \
+             0, NULL, NULL, NULL\
+         ), (\
+             'audit-queued-b', 'producer', 'email', 'email.send', '{}'::jsonb, \
+             'audit-queued-b', 'queued', 2, 0, transaction_timestamp() - interval '1 hour', \
+             0, NULL, NULL, NULL\
+         )",
+    )
+    .execute(postgres.pool())
+    .await
+    .unwrap();
+
+    let retryable = provider
+        .claim(
+            context("worker", 100),
+            ClaimRequest {
+                queue: "email".to_owned(),
+            },
+        )
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(retryable.job_id, "audit-retryable");
+    assert_eq!(retryable.attempt, 2);
+
+    let retired_after_one_claim: i64 = sqlx::query_scalar(
+        "SELECT count(*) FROM jobs \
+         WHERE id LIKE 'audit-exhausted-%' AND status = 'failed'",
+    )
+    .fetch_one(postgres.pool())
+    .await
+    .unwrap();
+    assert_eq!(retired_after_one_claim, EXPIRED_RETIREMENT_BATCH_LIMIT);
+    let still_expired: i64 = sqlx::query_scalar(
+        "SELECT count(*) FROM jobs \
+         WHERE id LIKE 'audit-exhausted-%' AND status = 'running'",
+    )
+    .fetch_one(postgres.pool())
+    .await
+    .unwrap();
+    assert_eq!(
+        still_expired,
+        exhausted_total - EXPIRED_RETIREMENT_BATCH_LIMIT
+    );
+
+    let first_claim = provider.claim(
+        context("worker-a", 101),
+        ClaimRequest {
+            queue: "email".to_owned(),
+        },
+    );
+    let second_claim = provider.claim(
+        context("worker-b", 102),
+        ClaimRequest {
+            queue: "email".to_owned(),
+        },
+    );
+    let (first_claim, second_claim) = tokio::join!(first_claim, second_claim);
+    let first_claim = first_claim.unwrap().unwrap();
+    let second_claim = second_claim.unwrap().unwrap();
+    assert_ne!(first_claim.job_id, second_claim.job_id);
+    assert!(first_claim.job_id.starts_with("audit-queued-"));
+    assert!(second_claim.job_id.starts_with("audit-queued-"));
+
+    let retired_after_concurrent_claims: i64 = sqlx::query_scalar(
+        "SELECT count(*) FROM jobs \
+         WHERE id LIKE 'audit-exhausted-%' AND status = 'failed'",
+    )
+    .fetch_one(postgres.pool())
+    .await
+    .unwrap();
+    assert_eq!(retired_after_concurrent_claims, exhausted_total);
 }
