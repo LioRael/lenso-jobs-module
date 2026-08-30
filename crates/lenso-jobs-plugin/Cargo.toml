@@ -1,6 +1,6 @@
 [package]
 name = "lenso-jobs-plugin"
-version = "0.1.1"
+version = "0.1.2"
 description = "First-party durable single-step Jobs Plugin for Lenso applications."
 edition.workspace = true
 license.workspace = true
