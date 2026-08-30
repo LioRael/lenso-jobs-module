@@ -75,3 +75,12 @@ PostgreSQL acceptance additionally requires a disposable database whose name sta
 LENSO_JOBS_TEST_DATABASE_URL=postgres://... \
   cargo test --locked --workspace --features postgres-acceptance
 ```
+
+## Release
+
+Both workspace crates are published from `main` through
+`.github/workflows/release-plz.yml`. Run its dry-run mode first. Live
+publication additionally requires `live=true` and `confirm=publish`, and
+uses crates.io Trusted Publishing with owner `LioRael`, repository
+`lenso-jobs-plugin`, workflow `release-plz.yml`, and no GitHub environment.
+The workflow has no registry-token fallback.
