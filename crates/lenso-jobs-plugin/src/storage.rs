@@ -10,6 +10,8 @@ use time::OffsetDateTime;
 
 use crate::{JobsError, format_time};
 
+pub(crate) const EXPIRED_RETIREMENT_BATCH_LIMIT: i64 = 64;
+
 #[derive(Clone, Debug)]
 pub(crate) struct NewJob {
     pub id: String,
@@ -115,13 +117,21 @@ pub(crate) async fn claim(
 ) -> Result<Option<ClaimResponse>, JobsError> {
     let mut transaction = postgres.pool().begin().await.map_err(db("begin claim"))?;
     sqlx::query(
-        "UPDATE jobs SET status = 'failed', last_failure_code = 'attempts_exhausted', \
-         lease_owner = NULL, lease_token_hash = NULL, lease_expires_at = NULL, \
-         updated_at = transaction_timestamp() \
-         WHERE queue = $1 AND status = 'running' AND lease_expires_at <= transaction_timestamp() \
-         AND attempts >= max_attempts",
+        "WITH expired_exhausted AS ( \
+           SELECT id FROM jobs \
+           WHERE queue = $1 AND status = 'running' \
+             AND lease_expires_at <= transaction_timestamp() \
+             AND attempts >= max_attempts \
+           ORDER BY lease_expires_at, id \
+           FOR UPDATE SKIP LOCKED LIMIT $2 \
+         ) \
+         UPDATE jobs AS job SET status = 'failed', last_failure_code = 'attempts_exhausted', \
+           lease_owner = NULL, lease_token_hash = NULL, lease_expires_at = NULL, \
+           updated_at = transaction_timestamp() \
+         FROM expired_exhausted WHERE job.id = expired_exhausted.id",
     )
     .bind(queue)
+    .bind(EXPIRED_RETIREMENT_BATCH_LIMIT)
     .execute(&mut *transaction)
     .await
     .map_err(db("retire exhausted jobs"))?;
