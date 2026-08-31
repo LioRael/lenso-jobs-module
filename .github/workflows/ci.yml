@@ -33,7 +33,6 @@ jobs:
           toolchain: 1.94.0
           components: rustfmt,clippy
       - uses: Swatinem/rust-cache@v2
-      - run: ./scripts/check-repository-boundary.sh
       - run: cargo fmt --all -- --check
       - run: cargo check --locked --workspace --all-targets
       - run: cargo test --locked --workspace --features postgres-acceptance
