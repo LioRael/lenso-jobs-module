@@ -18,10 +18,10 @@ base64.workspace = true
 futures.workspace = true
 getrandom.workspace = true
 lenso-capability-jobs = { path = "../lenso-capability-jobs", version = "0.1.2" }
-lenso-capability-secrets = { version = "0.1.1", git = "https://github.com/LioRael/lenso-secrets-plugin", rev = "c31aa142ff59b4536e2bf3e9785ccbb5bb5c0e6a" }
-lenso-kernel = { version = "0.2.0", git = "https://github.com/LioRael/lenso", rev = "cd35675a191d815b690c8889756dfe859a0e4d7b" }
-lenso-native-adapter = { version = "0.3.0", git = "https://github.com/LioRael/lenso-runtime-rust", rev = "b763a63adc20f1ccc9955e784c0d04c21489126b" }
-lenso-postgres-kit = { version = "0.1.0", git = "https://github.com/LioRael/lenso-postgres-kit", rev = "525c1012c789e6f54c3c2fdaf8507a626c93e65f" }
+lenso-capability-secrets = { version = "0.1.1" }
+lenso-kernel = { version = "0.2.0" }
+lenso-native-adapter = { version = "0.3.0" }
+lenso-postgres-kit = { version = "0.1.0" }
 serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
@@ -31,7 +31,7 @@ time.workspace = true
 zeroize.workspace = true
 
 [dev-dependencies]
-lenso-app-plan = { version = "0.3.0", git = "https://github.com/LioRael/lenso", rev = "cd35675a191d815b690c8889756dfe859a0e4d7b" }
+lenso-app-plan = { version = "0.3.0" }
 tokio = { version = "1.52", features = ["macros", "rt-multi-thread", "time"] }
 url = "2.5"
 
