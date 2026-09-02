@@ -668,7 +668,7 @@ dependencies = [
 
 [[package]]
 name = "lenso-capability-jobs"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "futures",
  "lenso-contract-runtime",
@@ -741,7 +741,7 @@ dependencies = [
 
 [[package]]
 name = "lenso-jobs-plugin"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "base64",
  "futures",
