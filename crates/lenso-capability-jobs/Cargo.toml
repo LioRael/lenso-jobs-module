@@ -1,6 +1,6 @@
 [package]
 name = "lenso-capability-jobs"
-version = "0.1.3"
+version = "0.1.4"
 description = "Portable durable Jobs Capability for Lenso applications."
 edition.workspace = true
 license.workspace = true
