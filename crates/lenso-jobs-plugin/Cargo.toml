@@ -1,6 +1,6 @@
 [package]
 name = "lenso-jobs-plugin"
-version = "0.1.3"
+version = "0.1.4"
 description = "First-party durable single-step Jobs Plugin for Lenso applications."
 edition.workspace = true
 license.workspace = true
@@ -17,7 +17,7 @@ postgres-acceptance = []
 base64.workspace = true
 futures.workspace = true
 getrandom.workspace = true
-lenso-capability-jobs = { path = "../lenso-capability-jobs", version = "0.1.3" }
+lenso-capability-jobs = { path = "../lenso-capability-jobs", version = "0.1.4" }
 lenso-capability-secrets = { version = "0.1.1" }
 lenso-kernel = { version = "0.2.0" }
 lenso-native-adapter = { version = "0.3.0" }
