@@ -33,6 +33,9 @@ jobs:
           toolchain: 1.94.0
           components: rustfmt,clippy
       - uses: Swatinem/rust-cache@v2
+      - name: Install exact contract projection checker
+        run: cargo install --locked --version '=0.6.5' lenso-contract-codegen
+      - run: lenso-contract-codegen workspace check --manifest-path Cargo.toml
       - run: cargo fmt --all -- --check
       - run: cargo check --locked --workspace --all-targets
       - run: cargo test --locked --workspace --features postgres-acceptance
